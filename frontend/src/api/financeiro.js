@@ -1,5 +1,3 @@
-
-// frontend/src/api/financeiro.js
 import api from './api';
 
 /**
@@ -8,6 +6,7 @@ import api from './api';
  */
 export const getLancamentos = async (filtros = {}) => {
   // Constrói a query string para os filtros
+  // A nossa API backend já suporta isto (ex: /api/lancamentos/?status=PENDENTE)
   const params = new URLSearchParams(filtros);
   
   try {
@@ -47,10 +46,10 @@ export const createLancamento = async (lancamentoData) => {
 
 /**
  * Atualiza um lançamento (parcialmente).
+ * Usamos PATCH para enviar apenas os campos alterados (ex: só o status).
  */
 export const updateLancamento = async (id, lancamentoData) => {
   try {
-    // Usamos PATCH aqui, é melhor para atualizações parciais (ex: só mudar o status)
     const response = await api.patch(`/lancamentos/${id}/`, lancamentoData);
     return response.data;
   } catch (error) {

@@ -1,5 +1,3 @@
-
-// frontend/src/pages/Financeiro/FinanceiroList.jsx
 import React, { useState, useEffect } from 'react';
 import { getLancamentos, deleteLancamento } from '../../api/financeiro'; // Funções da nossa API
 import { 
@@ -7,19 +5,15 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton
 } from '@mui/material';
 import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
-// (Assumindo que o react-router-dom está a ser usado para navegação)
 import { Link } from 'react-router-dom'; 
 
-// Função para formatar a data
+// Funções para formatar os dados
 const formatDate = (dateString) => {
   if (!dateString) return '---';
   const date = new Date(dateString);
-  // Adiciona o fuso horário para corrigir o dia (problema comum de JS)
   const userTimezoneOffset = date.getTimezoneOffset() * 60000;
   return new Date(date.getTime() + userTimezoneOffset).toLocaleDateString('pt-BR');
 }
-
-// Função para formatar o valor
 const formatCurrency = (value) => {
   if (value === null || value === undefined) return 'R$ 0,00';
   return parseFloat(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -35,17 +29,16 @@ const FinanceiroList = () => {
     setLoading(true);
     setError(null);
     try {
-      // Por enquanto, busca tudo. No futuro, podemos adicionar filtros aqui.
       const data = await getLancamentos();
-      setLancamentos(data);
+      setLancamentos(Array.isArray(data) ? data : []); // Garante que é um array
     } catch (err) {
-      setError('Falha ao carregar lançamentos.');
+      setError('Falha ao carregar lançamentos. Tente fazer login novamente.');
     } finally {
       setLoading(false);
     }
   };
 
-  // useEffect para carregar os dados quando a página abre
+  // Carrega os dados quando a página abre
   useEffect(() => {
     fetchLancamentos();
   }, []);
@@ -55,15 +48,14 @@ const FinanceiroList = () => {
     if (window.confirm('Tem a certeza que quer apagar este lançamento?')) {
       try {
         await deleteLancamento(id);
-        // Recarrega a lista após apagar
-        fetchLancamentos(); 
+        fetchLancamentos(); // Recarrega a lista
       } catch (err) {
         alert('Erro ao apagar lançamento.');
       }
     }
   };
 
-  if (loading) return <CircularProgress />;
+  if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}><CircularProgress /></Box>;
   if (error) return <Typography color="error">{error}</Typography>;
 
   return (
@@ -73,8 +65,8 @@ const FinanceiroList = () => {
         <Button 
           variant="contained" 
           startIcon={<AddIcon />}
-          component={Link} // (Assumindo que a rota /financeiro/novo existe)
-          to="/financeiro/novo"
+          component={Link} 
+          to="/financeiro/novo" // Rota para o formulário
         >
           Novo Lançamento
         </Button>
@@ -91,7 +83,7 @@ const FinanceiroList = () => {
               <TableCell>Tipo</TableCell>
               <TableCell>Status</TableCell>
               <TableCell>Vencimento</TableCell>
-              <TableCell>Pagamento</TableCell>
+              <TableCell>Pagamento/Receb.</TableCell>
               <TableCell>Ações</TableCell>
             </TableRow>
           </TableHead>
@@ -109,7 +101,7 @@ const FinanceiroList = () => {
                 <TableCell>
                   <IconButton 
                     component={Link} 
-                    to={`/financeiro/${row.id}`} // (Assumindo que a rota de edição existe)
+                    to={`/financeiro/${row.id}`} // Rota para edição
                     color="primary"
                   >
                     <EditIcon />

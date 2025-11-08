@@ -1,15 +1,12 @@
-
-// frontend/src/pages/Relatorios/RelatorioDashboard.jsx
-
 import React, { useState, useEffect } from 'react';
 import { getDashboard } from '../../api/relatorios'; // Importa a nossa função da API
 import { Box, Typography, Paper, CircularProgress, Grid, TextField, Button } from '@mui/material';
 
 // Um componente simples para mostrar os cartões de valores
 const StatCard = ({ title, value, color = 'text.secondary' }) => (
-  <Paper elevation={3} sx={{ p: 2, textAlign: 'center' }}>
-    <Typography variant="h6" color={color}>{title}</Typography>
-    <Typography variant="h4">
+  <Paper elevation={3} sx={{ p: 2, textAlign: 'center', height: '100%' }}>
+    <Typography variant="h6" color={color} sx={{fontSize: '1rem'}}>{title}</Typography>
+    <Typography variant="h4" sx={{fontSize: '1.75rem', fontWeight: 'bold'}}>
       {/* Formata o número como dinheiro (BRL) */}
       {typeof value === 'number' 
         ? value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -42,7 +39,7 @@ const RelatorioDashboard = () => {
     }
   };
 
-  // useEffect para carregar os dados quando a página abre
+  // Carrega os dados quando a página abre
   useEffect(() => {
     fetchDashboardData({ ano, mes });
   }, []); // O array vazio [] faz com que isto rode só uma vez
@@ -53,7 +50,7 @@ const RelatorioDashboard = () => {
   };
 
   if (loading) {
-    return <CircularProgress />;
+    return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}><CircularProgress /></Box>;
   }
 
   if (error) {
@@ -71,7 +68,7 @@ const RelatorioDashboard = () => {
       </Typography>
 
       {/* Secção de Filtros */}
-      <Paper elevation={2} sx={{ p: 2, mb: 3, display: 'flex', gap: 2, alignItems: 'center' }}>
+      <Paper elevation={2} sx={{ p: 2, mb: 3, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
         <TextField
           label="Ano"
           type="number"
@@ -92,40 +89,24 @@ const RelatorioDashboard = () => {
       {/* Secção de Balanço Total */}
       <Typography variant="h5" gutterBottom>Balanço Total (Acumulado)</Typography>
       <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid item xs={12} md={4}>
-          <StatCard title="Total a Receber" value={data.balanco_total.a_receber} color="green" />
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <StatCard title="Total a Pagar" value={data.balanco_total.a_pagar} color="red" />
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <StatCard title="Saldo Pendente Geral" value={data.balanco_total.saldo_geral_pendente} />
-        </Grid>
+        <Grid item xs={12} md={4}><StatCard title="Total a Receber" value={data.balanco_total.a_receber} color="green" /></Grid>
+        <Grid item xs={12} md={4}><StatCard title="Total a Pagar" value={data.balanco_total.a_pagar} color="red" /></Grid>
+        <Grid item xs={12} md={4}><StatCard title="Saldo Pendente Geral" value={data.balanco_total.saldo_geral_pendente} /></Grid>
       </Grid>
 
       {/* Secção de Previsão do Mês */}
       <Typography variant="h5" gutterBottom>Previsão do Mês ({data.periodo_referencia})</Typography>
       <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid item xs={12} md={4}>
-          <StatCard title="Novos a Receber" value={data.previsao_periodo.novos_a_receber} color="green" />
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <StatCard title="Novos a Pagar" value={data.previsao_periodo.novos_a_pagar} color="red" />
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <StatCard title="Saldo Previsto" value={data.previsao_periodo.saldo_previsto} />
-        </Grid>
+        <Grid item xs={12} md={4}><StatCard title="Novos a Receber" value={data.previsao_periodo.novos_a_receber} color="green" /></Grid>
+        <Grid item xs={12} md={4}><StatCard title="Novos a Pagar" value={data.previsao_periodo.novos_a_pagar} color="red" /></Grid>
+        <Grid item xs={12} md={4}><StatCard title="Saldo Previsto" value={data.previsao_periodo.saldo_previsto} /></Grid>
       </Grid>
 
       {/* Secção de Fluxo de Caixa do Mês */}
       <Typography variant="h5" gutterBottom>Fluxo de Caixa do Mês ({data.periodo_referencia})</Typography>
       <Grid container spacing={2}>
-        <Grid item xs={12} md={6}>
-          <StatCard title="Total Recebido" value={data.fluxo_caixa_periodo.total_recebido} color="blue" />
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <StatCard title="Total Pago" value={data.fluxo_caixa_periodo.total_pago} color="orange" />
-        </Grid>
+        <Grid item xs={12} md={6}><StatCard title="Total Recebido" value={data.fluxo_caixa_periodo.total_recebido} color="blue" /></Grid>
+        <Grid item xs={12} md={6}><StatCard title="Total Pago" value={data.fluxo_caixa_periodo.total_pago} color="orange" /></Grid>
       </Grid>
       
     </Box>

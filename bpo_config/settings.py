@@ -1,10 +1,23 @@
+"""
+Django settings for bpo_config project.
+"""
+
 from pathlib import Path
 from datetime import timedelta
+import os # <-- Adicionado
 
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# --- Adicionado para encontrar a pasta 'apps' ---
+import sys
+sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
+# ------------------------------------------------
+
 SECRET_KEY = 'django-insecure-_sz*et6n1w=56o8h+=ht4fl^1rr6&ysp=mmh0c2h9r&suzg2)%'
 DEBUG = True
 ALLOWED_HOSTS = []
+
 
 # Application definition
 INSTALLED_APPS = [
@@ -21,16 +34,17 @@ INSTALLED_APPS = [
     'django_filters',
     'corsheaders', 
     
-    # Nossas Apps
-    'apps.clientes',
-    'apps.financeiro',
-    'apps.relatorios',
+    # --- Nossas Apps (Caminho corrigido) ---
+    'financeiro', # (Mantivemos este, pois está na raiz do 'testes2')
+    # Se tivesses as outras apps, seriam:
+    # 'apps.clientes',
+    # 'apps.relatorios',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware', # <-- Adicionado
+    'corsheaders.middleware.CorsMiddleware', # Middleware do CORS
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -40,7 +54,6 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'bpo_config.urls'
 
-# (Templates, WSGI, Database... ficam iguais)
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -55,13 +68,18 @@ TEMPLATES = [
         },
     },
 ]
+
 WSGI_APPLICATION = 'bpo_config.wsgi.application'
+
+# Database
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# (Validadores de password...)
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',},
@@ -92,8 +110,7 @@ SIMPLE_JWT = {
 }
 
 # --- Configs de CORS ---
-# O frontend corre em http://localhost:5173
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
+    "http://localhost:5173", # Frontend Vite
     "http://127.0.0.1:5173",
 ]

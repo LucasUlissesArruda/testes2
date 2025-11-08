@@ -1,5 +1,3 @@
-// frontend/src/api/relatorios.js
-
 import api from './api'; // Importa a instância principal do Axios
 
 /**
@@ -9,6 +7,7 @@ import api from './api'; // Importa a instância principal do Axios
  */
 export const getDashboard = async (filtros = {}) => {
   const { ano, mes } = filtros;
+  // Esta é a rota que definimos no financeiro/urls.py
   let url = '/dashboard/';
 
   // Adiciona os filtros de data se eles existirem
@@ -25,5 +24,3 @@ export const getDashboard = async (filtros = {}) => {
     throw error;
   }
 };
-
-// Aqui podem entrar outras funções de relatórios (PDF, Excel) no futuro

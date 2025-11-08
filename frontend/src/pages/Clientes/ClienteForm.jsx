@@ -1,22 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Modal, Box, Typography, TextField, Button, 
-  CircularProgress 
-} from '@mui/material';
+import { useParams, useNavigate } from 'react-router-dom';
+import { createCliente, getClienteDetalhe, updateCliente } from '../../api/clientes';
+import { Box, Typography, Paper, CircularProgress, TextField, Button } from '@mui/material';
 
-const style = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: 400,
-  bgcolor: 'background.paper',
-  boxShadow: 24,
-  p: 4,
-  borderRadius: '10px',
-};
-
-function ClienteForm({ open, handleClose, cliente, onSave }) {
+const ClienteForm = () => {
   const [formData, setFormData] = useState({
     razao_social: '',
     cnpj: '',
@@ -24,18 +11,27 @@ function ClienteForm({ open, handleClose, cliente, onSave }) {
     responsavel_email: '',
     responsavel_telefone: '',
   });
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
+  const { id } = useParams(); // Pega o ID do URL (se estiver a editar)
+  const navigate = useNavigate(); // Para redirecionar após salvar
+
+  // Se existir um ID, busca os dados desse cliente para edição
   useEffect(() => {
-    if (cliente) {
-      setFormData(cliente);
-    } else {
-      setFormData({
-        razao_social: '', cnpj: '', responsavel_nome: '', 
-        responsavel_email: '', responsavel_telefone: ''
-      });
+    if (id) {
+      setLoading(true);
+      getClienteDetalhe(id)
+        .then(data => {
+          setFormData(data);
+          setLoading(false);
+        })
+        .catch(err => {
+          setError('Erro ao carregar cliente.');
+          setLoading(false);
+        });
     }
-  }, [cliente, open]);
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -44,33 +40,91 @@ function ClienteForm({ open, handleClose, cliente, onSave }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
-    await onSave(formData);
-    setIsLoading(false);
+    setLoading(true);
+    setError(null);
+    
+    try {
+      if (id) {
+        // Modo Edição
+        await updateCliente(id, formData);
+      } else {
+        // Modo Criação
+        await createCliente(formData);
+      }
+      navigate('/clientes'); // Volta para a lista
+    } catch (err) {
+      setError('Erro ao salvar cliente. Verifique os campos.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  return (
-    <Modal open={open} onClose={handleClose}>
-      <Box sx={style} component="form" onSubmit={handleSubmit}>
-        <Typography variant="h5" sx={{ mb: 2 }}>
-          {cliente ? 'Editar Cliente' : 'Adicionar Novo Cliente'}
-        </Typography>
+  if (loading && id) return <CircularProgress />;
 
-        <TextField name="razao_social" label="Razão Social" value={formData.razao_social} onChange={handleChange} fullWidth required margin="normal" />
-        <TextField name="cnpj" label="CNPJ" value={formData.cnpj} onChange={handleChange} fullWidth required margin="normal" />
-        <TextField name="responsavel_nome" label="Nome do Responsável" value={formData.responsavel_nome} onChange={handleChange} fullWidth required margin="normal" />
-        <TextField name="responsavel_email" label="Email do Responsável" value={formData.responsavel_email} type="email" onChange={handleChange} fullWidth required margin="normal" />
-        <TextField name="responsavel_telefone" label="Telefone (Opcional)" value={formData.responsavel_telefone || ''} onChange={handleChange} fullWidth margin="normal" />
+  return (
+    <Box component={Paper} sx={{ p: 3 }} elevation={3}>
+      <Typography variant="h4" gutterBottom>
+        {id ? 'Editar Cliente' : 'Novo Cliente'}
+      </Typography>
+      <form onSubmit={handleSubmit}>
+        <TextField
+          label="Razão Social"
+          name="razao_social"
+          value={formData.razao_social}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+          required
+        />
+        <TextField
+          label="CNPJ"
+          name="cnpj"
+          value={formData.cnpj}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+          required
+        />
+        <TextField
+          label="Nome do Responsável"
+          name="responsavel_nome"
+          value={formData.responsavel_nome}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+        />
+        <TextField
+          label="Email do Responsável"
+          name="responsavel_email"
+          type="email"
+          value={formData.responsavel_email}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+        />
+        <TextField
+          label="Telefone do Responsável"
+          name="responsavel_telefone"
+          value={formData.responsavel_telefone}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+        />
         
-        <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-          <Button onClick={handleClose} disabled={isLoading}>Cancelar</Button>
-          <Button type="submit" variant="contained" disabled={isLoading}>
-            {isLoading ? <CircularProgress size={24} /> : 'Salvar'}
+        {error && <Typography color="error" sx={{ mt: 2 }}>{error}</Typography>}
+
+        <Box sx={{ mt: 2 }}>
+          <Button type="submit" variant="contained" disabled={loading}>
+            {loading ? 'Salvando...' : 'Salvar'}
+          </Button>
+          <Button variant="outlined" sx={{ ml: 2 }} onClick={() => navigate('/clientes')}>
+            Cancelar
           </Button>
         </Box>
-      </Box>
-    </Modal>
+      </form>
+    </Box>
   );
-}
+};
 
 export default ClienteForm;
